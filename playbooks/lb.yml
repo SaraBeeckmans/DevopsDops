@@ -1,6 +1,8 @@
 ---
 
 - hosts: all
+  become: true
+  become_user: root
 
   vars:
 #    haproxy_app_name: devopdsdops
@@ -13,41 +15,62 @@
       port: _
       paramstring: _
     haproxy_backend_servers:
-      - name: server1
-        ip: 10.133.181.247
+      - name: server1     #dummy structure, enkel ter voorbeels om aan te geven welke parameters er nodig zij
+        ip: 11.11.11.11   #Echte config wordt gepushed vanuit Vagrant
         port: 80
         paramstring: cookie A check
-      #- {name: server2, ip: 10.133.186.46, port: 80, paramstring: cookie A check}
+
 
 
   tasks:
-    # Source box comes with nginx, needs to be disabled, and deinstalled
-    - name: Stop nginx service
-      become: true
-      become_user: root
-      service:
-        name: nginx
-        state: stopped
 
-    - name: Deinstall nginx (haproxy needs to bind to port80 and nginx)
-      become: true
-      become_user: root
-      apt: name=nginx state=absent
+    # Install firewall $ configure
+    # UFW already inslalled in source-box (default disabled)
+    - name: Set ufw logging
+      ufw:
+        logging: on
+
+    - name: Allow Incoming OpenSSH
+      ufw:
+        rule: allow
+        name: OpenSSH
+        direction: in
+
+    - name: Allow Incoming port 22
+      ufw:
+        rule: allow
+        port: 22
+        direction: in
+        state: enabled
+
+    - name: Allow Incoming port 2222
+      ufw:
+        rule: allow
+        port: 2222
+        direction: in
+        state: enabled
+
+    - name: Allow Incoming www (enable ufw)
+      ufw:
+        rule: allow
+        port: 80
+        direction: in
+
+    - name: Allow all outgoing (Don't yet enable ufw)
+      ufw:
+        policy: allow
+        direction: outgoing
+
+    - name: Deny all incomming (Don't yet enable ufw)
+      ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
 
     - name: Install HAProxy on loadbalancer
       apt: name=haproxy state=present
       become: true
       become_user: root
-
-#    - name: copy haproxy.cfg to loadbalancer
-#      become: true
-#      become_user: root
-#      copy:
-#        src: ../cfg/lb_conf/haproxy.cfg
-#        dest: /etc/haproxy/haproxy.cfg
-#        owner: root
-#        group: root
-#        mode: 0644
 
     - name: Update HAProxy config
       become: true
