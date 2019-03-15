@@ -1,0 +1,8 @@
+---
+
+- hosts: all
+  tasks:
+    - name: Install nginx on frontend machine
+      apt: name=nginx state=present
+      become: true
+      become_user: root

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+echo Creating user peter
+
+dir=/home/peter
+usr=peter
+publickey="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCq//MBpHzEkW7qKCIUpgxb7IXfQzsQxIe75Vh9qybAvfMytRIJvc1kjvGpxa0PuRJMzZbCMT+O5GTRal5hoCX8OOFm7Vg5A84s/7vL4lN9hoH7yOtr16XuaIoJ3fHzBNGC4w6ZSo9LdXUkGoOCLhYpa2mkfCQRAtFfNDiXT4YvAS31w3YK11IMB/LSbnUJCRq+TC4OqSYnYDFYdX0A56D1FWGBZpisHXWxIYsF7x75y9SwNB/q2LKJSsEhOBPpGL+0JUXTSHAEOomzoKYys4I2bkWipXH94ZBMUjS+pLX204T0TGEsflarW0SpJQPw7oueNrxCplwD5UsHKOAGH8Db peter@Peters-iMac-Pro.local"
+
+
+# Na te kijken door Dimitri
+# ################
+grep -q "ChallengeResponseAuthentication" /etc/ssh/sshd_config && sed -i "/^[^#]*ChallengeResponseAuthentication[[:space:]]yes.*/c\ChallengeResponseAuthentication no" /etc/ssh/sshd_config || echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config
+grep -q "^[^#]*PasswordAuthentication" /etc/ssh/sshd_config && sed -i "/^[^#]*PasswordAuthentication[[:space:]]yes/c\PasswordAuthentication no" /etc/ssh/sshd_config || echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+service ssh restart
+# ################
+
+
+
+if [[ ! -d $dir ]]; then
+  mkdir $dir
+  mkdir $dir/.ssh
+  touch $dir/.ssh/authorized_keys
+  echo $publickey >> $dir/.ssh/authorized_keys
+
+  useradd -p $(openssl passwd -1 ChangeMe) -d $dir -s /bin/bash $usr
+  chown -R $usr:$usr $dir
+  usermod -aG sudo $usr
+
+  echo "export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/jre/bin/" >> /etc/bash.bashrc
+else
+  echo "$dir already exists."
+fi
