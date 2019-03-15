@@ -20,18 +20,7 @@ Vagrant.configure("2") do |config|
 N=1
 BasecountIP = 9
 
-
-  config.vm.define "lb" do |lb|
-     lb.vm.box = "bento/ubuntu-18.04"
-     lb.vm.network "private_network", ip: "192.168.50.10"
-     lb.vm.provision "shell", path: "./create_users"
-     lb.vm.provision "shell", path: "./change_ssh_config"
-
-     lb.vm.provision :ansible do |ansible|
-       ansible.playbook = "playbooks/lb.yml"
-      end
-   end
-
+#FrontendServers
 (1..N).each do |machine_id|
   config.vm.define "frontend-#{BasecountIP+machine_id}" do |frontend|
     frontend.vm.box = "bento/ubuntu-18.04"
@@ -48,18 +37,25 @@ BasecountIP = 9
   end
 end
 
+# Load balancer
+config.vm.define "lb" do |lb|
+   lb.vm.box = "bento/ubuntu-18.04"
+   lb.vm.network "private_network", ip: "192.168.50.10"
+   lb.vm.provision "shell", path: "./create_users"
+   lb.vm.provision "shell", path: "./change_ssh_config"
 
-#  config.vm.provision "shell", path: "./create_users"
-#  config.vm.provision "shell", path: "./change_ssh_config"
-
-#  config.vm.provision "shell", inline: <<-SHELL
-#  SHELL
-
-#  config.vm.provision :ansible do |ansible|
-#    ansible.playbook = "provisioning/elk.yml"
-#  end
-
-
+   lb.vm.provision :ansible do |ansible|
+     ansible.playbook = "playbooks/lb.yml"
+     FrontendServers = []
+     #Build list of front end servers to provision loadbalancer config
+     (1..N).each do |machine_id|
+       FrontendServers << {"name": "frontend-#{BasecountIP+machine_id}", "ip": "192.168.100.#{BasecountIP+machine_id}", "port": 80, "paramstring": "cookie A check"}
+     end
+     ansible.extra_vars = {
+                "haproxy_backend_servers" => FrontendServers
+    }
+    end
+ end
 
 
 end
