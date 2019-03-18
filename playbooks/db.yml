@@ -1,0 +1,59 @@
+---
+
+- hosts: all
+  become: true
+  become_user: root
+
+  vars:
+    backend_servers:
+      - ip: 11.11.11.11   #Echte config wordt gepushed vanuit Vagrant, hebben we later nodig voor de fw rules
+
+
+  tasks:
+    - name: Install mysql
+      apt: name=mysql-server state=present
+
+    # Install firewall & configure
+    # UFW already inslalled in source-box (default disabled)
+    - name: Set ufw logging
+      ufw:
+        logging: on
+
+    - name: Allow Incoming OpenSSH
+      ufw:
+        rule: allow
+        name: OpenSSH
+        direction: in
+
+    - name: Allow Incoming port 22
+      ufw:
+        rule: allow
+        port: 22
+        direction: in
+        state: enabled
+
+    - name: Allow Incoming port 2222
+      ufw:
+        rule: allow
+        port: 2222
+        direction: in
+        state: enabled
+
+    - name: Allow Incoming mysql from backend servers
+      ufw:
+        rule: allow
+        port: 3306
+        direction: in
+        #src: "{{lb_server_address}}" #TODO network not working as expected
+        state: enabled
+
+    - name: Allow all outgoing (Don't yet enable ufw)
+      ufw:
+        policy: allow
+        direction: outgoing
+
+    - name: Deny all incomming (enable ufw)
+      ufw:
+        state: enabled
+        policy: deny
+        direction: incoming

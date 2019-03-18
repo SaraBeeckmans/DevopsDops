@@ -20,6 +20,29 @@ Vagrant.configure("2") do |config|
 N=1
 BasecountIP = 9
 LB_server = '192.168.50.10'
+DB_server = '192.168.200.10'
+
+
+# DB server
+config.vm.define "db" do |db|
+   db.vm.box = "bento/ubuntu-18.04"
+   db.vm.network "private_network", ip: DB_server
+   db.vm.provision "shell", path: "./create_users"
+   db.vm.provision "shell", path: "./change_ssh_config"
+
+   db.vm.provision :ansible do |ansible|
+     ansible.playbook = "playbooks/db.yml"
+     BackendServers = []
+     #Build list of front end servers to provision loadbalancer config
+     (1..N).each do |machine_id|
+       BackendServers << {"ip": "192.168.150.#{BasecountIP+machine_id}"}
+     end
+     ansible.extra_vars = {
+                "backend_servers" => BackendServers
+    }
+    end
+ end
+
 
 
 #BackendServers

@@ -11,7 +11,7 @@
     - name: Install nginx on frontend machine
       apt: name=nginx state=present
 
-    # Install firewall $ configure
+    # Install firewall & configure
     # UFW already inslalled in source-box (default disabled)
     - name: Set ufw logging
       ufw:
