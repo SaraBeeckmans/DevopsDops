@@ -10,8 +10,6 @@
   tasks:
     - name: Install nginx on frontend machine
       apt: name=nginx state=present
-      become: true
-      become_user: root
 
     # Install firewall $ configure
     # UFW already inslalled in source-box (default disabled)
@@ -39,12 +37,13 @@
         direction: in
         state: enabled
 
-    - name: Allow Incoming www only from lb_server_address (enable ufw)
+    - name: Allow Incoming www only from lb_server_address
       ufw:
         rule: allow
         port: 80
         direction: in
         src: "{{lb_server_address}}"
+        state: enabled
 
     - name: Allow all outgoing (Don't yet enable ufw)
       ufw:

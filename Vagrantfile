@@ -27,6 +27,7 @@ LB_server = '192.168.50.10'
     frontend.vm.box = "bento/ubuntu-18.04"
     frontend.vm.network "private_network", ip: "192.168.100.#{BasecountIP+machine_id}"
 
+    #Parallel provisioning
     if machine_id == N
       frontend.vm.provision "shell", path: "./create_users"
       frontend.vm.provision "shell", path: "./change_ssh_config"

@@ -9,11 +9,11 @@
     haproxy_mode: http
     haproxy_enable_stats: enable
     haproxy_algorithm: roundrobin
-    haproxy_backend_server:
-      name: _
-      ip: _
-      port: _
-      paramstring: _
+#    haproxy_backend_server:
+#      name: _
+#      ip: _
+#      port: _
+#      paramstring: _
     haproxy_backend_servers:
       - name: server1     #dummy structure, enkel ter voorbeels om aan te geven welke parameters er nodig zij
         ip: 11.11.11.11   #Echte config wordt gepushed vanuit Vagrant
@@ -69,12 +69,8 @@
 
     - name: Install HAProxy on loadbalancer
       apt: name=haproxy state=present
-      become: true
-      become_user: root
 
     - name: Update HAProxy config
-      become: true
-      become_user: root
       template: src=../cfg/lb_conf/haproxy.cfg
             dest=/etc/haproxy/haproxy.cfg
             backup=yes
