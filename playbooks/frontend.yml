@@ -42,7 +42,7 @@
         rule: allow
         port: 80
         direction: in
-        src: "{{lb_server_address}}"
+        #src: "{{lb_server_address}}"
         state: enabled
 
     - name: Allow all outgoing (Don't yet enable ufw)

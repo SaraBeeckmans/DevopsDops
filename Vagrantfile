@@ -21,6 +21,29 @@ N=1
 BasecountIP = 9
 LB_server = '192.168.50.10'
 
+
+#BackendServers
+(1..N).each do |machine_id|
+  config.vm.define "backend-#{BasecountIP+machine_id}" do |frontend|
+    frontend.vm.box = "bento/ubuntu-18.04"
+    frontend.vm.network "private_network", ip: "192.168.150.#{BasecountIP+machine_id}"
+
+    #Parallel provisioning
+    if machine_id == N
+      frontend.vm.provision "shell", path: "./create_users"
+      frontend.vm.provision "shell", path: "./change_ssh_config"
+      frontend.vm.provision :ansible do |ansible|
+        ansible.limit = "all"
+        ansible.playbook = "playbooks/backend.yml"
+#        ansible.extra_vars = {
+#          "lb_server_address"=> LB_server
+#        }
+      end
+    end
+  end
+end
+
+
 #FrontendServers
 (1..N).each do |machine_id|
   config.vm.define "frontend-#{BasecountIP+machine_id}" do |frontend|

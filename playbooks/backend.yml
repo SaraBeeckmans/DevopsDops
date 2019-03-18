@@ -1,0 +1,21 @@
+---
+
+- hosts: all
+  become: true
+  become_user: root
+
+#  vars:
+#    lb_server_address: 1.1.1.1 #Dummy var, will be set by vagrant script
+
+
+# Python 2.7.15rc1 Available on default box
+# Python 3.6.7  Available on default box
+
+  tasks:
+    - name: install pip
+      apt:
+        name: python-pip
+
+    - name: install Flask
+      pip:
+        name: Flask
