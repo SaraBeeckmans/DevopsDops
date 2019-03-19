@@ -1,6 +1,6 @@
 ---
 
-- hosts: all
+- hosts: lbservers
   become: true
   become_user: root
 

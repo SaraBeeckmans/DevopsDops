@@ -1,11 +1,11 @@
 ---
 
-- hosts: all
+- hosts: beservers
   become: true
   become_user: root
 
-#  vars:
-#    lb_server_address: 1.1.1.1 #Dummy var, will be set by vagrant script
+  vars:
+    frontendserver_address: 1.1.1.1 #Dummy var, will be set by vagrant script
 
 
 # Python 2.7.15rc1 Available on default box
@@ -72,7 +72,7 @@
         rule: allow
         port: 80
         direction: in
-        #src: "{{lb_server_address}}"
+        src: "{{frontendserver_address}}"
         state: enabled
 
     - name: Allow all outgoing (Don't yet enable ufw)
