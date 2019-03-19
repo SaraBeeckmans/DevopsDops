@@ -1,18 +1,16 @@
 #!/bin/bash
 
-echo Creating user peter
+echo Creating user sara
 
-dir=/home/peter
-usr=peter
-publickey="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCq//MBpHzEkW7qKCIUpgxb7IXfQzsQxIe75Vh9qybAvfMytRIJvc1kjvGpxa0PuRJMzZbCMT+O5GTRal5hoCX8OOFm7Vg5A84s/7vL4lN9hoH7yOtr16XuaIoJ3fHzBNGC4w6ZSo9LdXUkGoOCLhYpa2mkfCQRAtFfNDiXT4YvAS31w3YK11IMB/LSbnUJCRq+TC4OqSYnYDFYdX0A56D1FWGBZpisHXWxIYsF7x75y9SwNB/q2LKJSsEhOBPpGL+0JUXTSHAEOomzoKYys4I2bkWipXH94ZBMUjS+pLX204T0TGEsflarW0SpJQPw7oueNrxCplwD5UsHKOAGH8Db peter@Peters-iMac-Pro.local"
+dir=/home/sara
+usr=sara
+publickey = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC/T0PeeFjCUftqdyn3IzfXvaXfVFsqjUqYY4DtQT9SoH1ciMGZtMqL3xukBIbRGTegptJZniT6iDsFbZqi/XDFe8Iq6BJ2pXdtBgtfNJ0c1q8yPLWq2jvYup8mDL6JHgEkMbrZQwhzvgPFN2MtGU/AXtsZnI05jZSAwhPSa1PmkuHUHTgwVccFWnuD+3iDosTZ0vq0oWEETt8eOQCxHFmLA259sdkfsh7GIlZ9oDDTxO9KpnH+j5KOooyi7iKCW2g/BKtLj/W4ln+K7kq8fpJzaY5Hj5+L26u1ZJy0I0iRRKep2snDGYXhyt4qgHCjktCylP0fDRMaNcr6IU4dlFs1 sara@Saras-MacBook-Pro.local"
 
 
-# Na te kijken door Dimitri
-# ################
 grep -q "ChallengeResponseAuthentication" /etc/ssh/sshd_config && sed -i "/^[^#]*ChallengeResponseAuthentication[[:space:]]yes.*/c\ChallengeResponseAuthentication no" /etc/ssh/sshd_config || echo "ChallengeResponseAuthentication no" >> /etc/ssh/sshd_config
 grep -q "^[^#]*PasswordAuthentication" /etc/ssh/sshd_config && sed -i "/^[^#]*PasswordAuthentication[[:space:]]yes/c\PasswordAuthentication no" /etc/ssh/sshd_config || echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 service ssh restart
-# ################
+
 
 
 
