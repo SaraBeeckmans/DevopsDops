@@ -1,20 +1,21 @@
 ---
 
-- hosts: all
+- hosts: dbservers
   become: true
   become_user: root
 
   vars:
-    backend_servers:
-      - ip: 11.11.11.11   #Echte config wordt gepushed vanuit Vagrant, hebben we later nodig voor de fw rules
+    BackendServers_subnet:
+      - ip: 11.11.11.0/30   #Echte config wordt gepushed vanuit Vagrant, hebben we later nodig voor de fw rules
 
 
   tasks:
+    #Install mysql server op standaard poort, met standaard configuratie
     - name: Install mysql
       apt: name=mysql-server state=present
 
     # Install firewall & configure
-    # UFW already inslalled in source-box (default disabled)
+    # UFW reeds geinstalleerd op de source-box die we gebruiken (default disabled)
     - name: Set ufw logging
       ufw:
         logging: on
@@ -44,7 +45,7 @@
         rule: allow
         port: 3306
         direction: in
-        #src: "{{lb_server_address}}" #TODO network not working as expected
+        src: "{{BackendServers_subnet}}"
         state: enabled
 
     - name: Allow all outgoing (Don't yet enable ufw)
