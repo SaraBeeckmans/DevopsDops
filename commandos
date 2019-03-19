@@ -1,0 +1,28 @@
+lb:
+
+http://192.168.50.2/
+ssh sara@192.168.50.2
+
+sudo ufw status
+sudo service haproxy status
+sudo tail -f /var/log/haproxy.log
+less /etc/haproxy/haproxy.cfg
+
+
+frontend:
+ssh sara@192.168.60.3
+sudo ufw status
+sudo service nginx status
+
+backend:
+ssh sara@192.168.150.3
+sudo ufw status
+lask --version
+nodejs --version
+gunicorn --version
+ReacktJS ???
+
+DB:
+ssh sara@1912.168.200.2
+sudo ufw status
+sudo service mysql status
