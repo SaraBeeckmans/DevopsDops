@@ -25,8 +25,8 @@ Vagrant.configure("2") do |config|
    N_be=2 #Aantal hosts in backend laag
    N_fe=2    #Aantal hosts in frontend laag
 
-   LB_server = '192.168.50.1'
-   DB_server = '192.168.200.1'
+   LB_server = '192.168.50.2'
+   DB_server = '192.168.200.2'
 
    Loadsbalancer_subnet = '192.168.50.0/24'
    FrontendServers_subnet = '192.168.60.0/24'
@@ -55,7 +55,7 @@ config.vm.define "db" do |db|
 (1..N_be).each do |machine_id_BE|
   config.vm.define "backend-#{machine_id_BE}" do |backend|
     backend.vm.box = "bento/ubuntu-18.04"
-    backend.vm.network "private_network", ip: "192.168.150.#{0+machine_id_BE}"
+    backend.vm.network "private_network", ip: "192.168.150.#{1+machine_id_BE}"
 
     #Parallel provisioning
     if machine_id_BE == N_be
@@ -77,7 +77,7 @@ config.vm.define "db" do |db|
 
 
         ansible_be.extra_vars = {
-          "frontendserver_address"=> "192.168.60.#{0+machine_id_BE}" #Voor firewall rules
+          "frontendserver_address"=> "192.168.60.#{1+machine_id_BE}" #Voor firewall rules
         }
       end
     end
@@ -89,7 +89,7 @@ end
 (1..N_fe).each do |machine_id_FE|
   config.vm.define "frontend-#{machine_id_FE}" do |frontend|
     frontend.vm.box = "bento/ubuntu-18.04"
-    frontend.vm.network "private_network", ip: "192.168.60.#{0+machine_id_FE}"
+    frontend.vm.network "private_network", ip: "192.168.60.#{1+machine_id_FE}"
 
     #Parallel provisioning
     if machine_id_FE == N_fe
@@ -134,7 +134,7 @@ config.vm.define "lb" do |lb|
      FrontendServers = []
      #Build list of front end servers to provision loadbalancer config
      (1..N_fe).each do |machine_id_FE|
-       FrontendServers << {"name": "frontend-#{machine_id_FE}", "ip": "192.168.60.#{0+machine_id_FE}", "port": 80, "paramstring": "cookie A check"}
+       FrontendServers << {"name": "frontend-#{machine_id_FE}", "ip": "192.168.60.#{1+machine_id_FE}", "port": 80, "paramstring": "cookie A check"}
      end
      ansible_lb.extra_vars = {
                 "haproxy_backend_servers" => FrontendServers
