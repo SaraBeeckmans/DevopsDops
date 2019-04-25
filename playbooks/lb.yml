@@ -20,9 +20,56 @@
         port: 80
         paramstring: cookie A check
 
+    username: _
+    passwd: _
+
 
 
   tasks:
+
+
+#############################
+### User en ssh settings
+############################
+
+    #Create user
+    - name: Creating user "{{username}}" with admin access
+      user:
+        name: "{{username}}"
+        password: "{{ passwd | password_hash('sha512') }}"
+        groups: adm
+        append: yes
+        shell: /bin/bash
+
+    - name: Add user "{{username}}" to the sudoers
+      copy:
+        dest: "/etc/sudoers.d/{{username}}"
+        content: "{{username}}  ALL=(ALL)  NOPASSWD: ALL"
+
+    - name: Deploy SSH Key
+      authorized_key: user={{username}}
+                      key="{{ lookup('file', '/Users/{{username}}/.ssh/id_rsa.pub') }}"
+                      state=present
+
+    - name: Disable Password Authentication
+      lineinfile:
+           dest=/etc/ssh/sshd_config
+           regexp='^PasswordAuthentication'
+           line="PasswordAuthentication no"
+           state=present
+           backup=yes
+    - name: Disable Root Login
+      lineinfile:
+           dest=/etc/ssh/sshd_config
+           regexp='^PermitRootLogin'
+           line="PermitRootLogin no"
+           state=present
+           backup=yes
+      notify:
+        - restart ssh
+
+
+
 
     # Install firewall $ configure
     # UFW already inslalled in source-box (default disabled)
@@ -81,3 +128,11 @@
       service:
         name: haproxy
         state: restarted
+
+
+ 
+  handlers:
+    - name: restart ssh
+      service:
+          name: sshd
+          state: restarted

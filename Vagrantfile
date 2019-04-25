@@ -22,8 +22,8 @@ Vagrant.configure("2") do |config|
      vb.cpus = 1
    end
 
-   N_be=2 #Aantal hosts in backend laag
-   N_fe=2    #Aantal hosts in frontend laag
+   N_be=4 #Aantal hosts in backend laag
+   N_fe=4    #Aantal hosts in frontend laag
 
    LB_server = '192.168.50.2'
    DB_server = '192.168.200.2'
@@ -37,8 +37,6 @@ Vagrant.configure("2") do |config|
 config.vm.define "db" do |db|
    db.vm.box = "bento/ubuntu-18.04"
    db.vm.network "private_network", ip: DB_server
-   db.vm.provision "shell", path: "./create_users"
-   db.vm.provision "shell", path: "./change_ssh_config"
 
    db.vm.provision :ansible do |ansible_DB|
      ansible_DB.groups = {
@@ -46,7 +44,9 @@ config.vm.define "db" do |db|
        }
      ansible_DB.playbook = "playbooks/db.yml"
      ansible_DB.extra_vars = {
-                "BackendServers_subnet" => BackendServers_subnet
+                "BackendServers_subnet" => BackendServers_subnet,
+                "username"=> "sara",
+                "passwd"=> "ChangeMe"
     }
     end
  end
@@ -59,8 +59,6 @@ config.vm.define "db" do |db|
 
     #Parallel provisioning
     if machine_id_BE == N_be
-      backend.vm.provision "shell", path: "./create_users"
-      backend.vm.provision "shell", path: "./change_ssh_config"
       backend.vm.provision :ansible do |ansible_be|
         ansible_be.limit = "all"
         ansible_be.playbook = "playbooks/backend.yml"
@@ -77,8 +75,10 @@ config.vm.define "db" do |db|
 
 
         ansible_be.extra_vars = {
-          "frontendserver_address"=> "192.168.60.#{1+machine_id_BE}" #Voor firewall rules
-        }
+          "frontendserver_address"=> "192.168.60.#{1+machine_id_BE}", #Voor firewall rules
+          "username"=> "sara",
+          "passwd"=> "ChangeMe"
+      }
       end
     end
   end
@@ -93,8 +93,7 @@ end
 
     #Parallel provisioning
     if machine_id_FE == N_fe
-      frontend.vm.provision "shell", path: "./create_users"
-      frontend.vm.provision "shell", path: "./change_ssh_config"
+
       frontend.vm.provision :ansible do |ansible_fe|
         ansible_fe.limit = "all"
         ansible_fe.playbook = "playbooks/frontend.yml"
@@ -110,8 +109,10 @@ end
           }
 
         ansible_fe.extra_vars = {
-          "lb_server_address"=> LB_server #Voor Firewall rules
-        }
+          "lb_server_address"=> LB_server, #Voor Firewall rules
+          "username"=> "sara",
+          "passwd"=> "ChangeMe"
+      }
       end
     end
   end
@@ -121,8 +122,6 @@ end
 config.vm.define "lb" do |lb|
    lb.vm.box = "bento/ubuntu-18.04"
    lb.vm.network "private_network", ip: LB_server
-   lb.vm.provision "shell", path: "./create_users"
-   lb.vm.provision "shell", path: "./change_ssh_config"
 
    lb.vm.provision :ansible do |ansible_lb|
      ansible_lb.playbook = "playbooks/lb.yml"
@@ -137,8 +136,10 @@ config.vm.define "lb" do |lb|
        FrontendServers << {"name": "frontend-#{machine_id_FE}", "ip": "192.168.60.#{1+machine_id_FE}", "port": 80, "paramstring": "cookie A check"}
      end
      ansible_lb.extra_vars = {
-                "haproxy_backend_servers" => FrontendServers
-    }
+                "haproxy_backend_servers" => FrontendServers,
+                  "username"=> "sara",
+                  "passwd"=> "ChangeMe"
+                }
     end
  end
 

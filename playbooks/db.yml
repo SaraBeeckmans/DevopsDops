@@ -7,9 +7,52 @@
   vars:
     BackendServers_subnet:
       - ip: 11.11.11.0/30   #Echte config wordt gepushed vanuit Vagrant, hebben we later nodig voor de fw rules
-
+    username: _
+    passwd: _
 
   tasks:
+
+#############################
+### User en ssh settings
+############################
+
+    #Create user
+    - name: Creating user "{{username}}" with admin access
+      user:
+        name: "{{username}}"
+        password: "{{ passwd | password_hash('sha512') }}"
+        groups: adm
+        append: yes
+        shell: /bin/bash
+
+    - name: Add user "{{username}}" to the sudoers
+      copy:
+        dest: "/etc/sudoers.d/{{username}}"
+        content: "{{username}}  ALL=(ALL)  NOPASSWD: ALL"
+
+    - name: Deploy SSH Key
+      authorized_key: user={{username}}
+                      key="{{ lookup('file', '/Users/{{username}}/.ssh/id_rsa.pub') }}"
+                      state=present
+
+    - name: Disable Password Authentication
+      lineinfile:
+           dest=/etc/ssh/sshd_config
+           regexp='^PasswordAuthentication'
+           line="PasswordAuthentication no"
+           state=present
+           backup=yes
+    - name: Disable Root Login
+      lineinfile:
+           dest=/etc/ssh/sshd_config
+           regexp='^PermitRootLogin'
+           line="PermitRootLogin no"
+           state=present
+           backup=yes
+      notify:
+        - restart ssh
+
+
     #Install mysql server op standaard poort, met standaard configuratie
     - name: Install mysql
       apt: name=mysql-server state=present
@@ -47,6 +90,15 @@
         direction: in
         src: "{{BackendServers_subnet}}"
         state: enabled
+        delete: yes
+
+    - name: Allow Incoming mysql from backend servers
+      ufw:
+        rule: allow
+        port: 3306
+        direction: in
+        #src: "{{BackendServers_subnet}}"
+        state: enabled
 
     - name: Allow all outgoing (Don't yet enable ufw)
       ufw:
@@ -58,3 +110,10 @@
         state: enabled
         policy: deny
         direction: incoming
+
+
+  handlers:
+    - name: restart ssh
+      service:
+          name: sshd
+          state: restarted
