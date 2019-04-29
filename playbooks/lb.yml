@@ -130,7 +130,7 @@
         state: restarted
 
 
- 
+
   handlers:
     - name: restart ssh
       service:
